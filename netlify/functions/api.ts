@@ -7,7 +7,3 @@ export const handler = async (...args: Parameters<Awaited<typeof handlerPromise>
   const serverlessHandler = await handlerPromise;
   return serverlessHandler(...args);
 };
-
-export const config = {
-  path: '/api/*'
-};

@@ -3,11 +3,7 @@
   publish = "dist/registro-proveedor-web/browser"
 
 [functions]
+  directory = "netlify/functions"
   node_bundler = "esbuild"
   external_node_modules = ["express"]
   included_files = ["agent/prompt.md", "fixtures/**"]
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200

@@ -9,7 +9,7 @@
       "sourceRoot": "web/src",
       "prefix": "app",
       "architect": {
-        "build": { "builder": "@angular/build:application", "options": { "browser": "web/src/main.ts", "tsConfig": "web/tsconfig.app.json", "assets": [], "styles": ["web/src/styles.css"] } },
+        "build": { "builder": "@angular/build:application", "options": { "browser": "web/src/main.ts", "tsConfig": "web/tsconfig.app.json", "assets": [{ "glob": "**/*", "input": "web/public", "output": "/" }], "styles": ["web/src/styles.css"] } },
         "serve": { "builder": "@angular/build:dev-server", "options": { "buildTarget": "registro-proveedor-web:build" } }
       }
     }
