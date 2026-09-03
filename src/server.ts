@@ -1,6 +1,6 @@
 import express from 'express';
 import path from 'node:path';
-import { appendFile, mkdir, readFile } from 'node:fs/promises';
+import { appendFile, mkdir, readFile, readdir } from 'node:fs/promises';
 import { z } from 'zod';
 import { leerSolicitud, mapearCampos, generarFormulario, armarPaquete, simularEnvio } from './tools/proveedor.js';
 import type { ToolContext, ToolTrace } from './types.js';
@@ -19,6 +19,15 @@ const sessions = new Map<string, { messages: ChatMessage[]; traces: ToolTrace[];
 const tools = {
   'proveedor.leerSolicitud': leerSolicitud, 'proveedor.mapearCampos': mapearCampos, 'proveedor.generarFormulario': generarFormulario, 'proveedor.armarPaquete': armarPaquete, 'proveedor.simularEnvio': simularEnvio
 } as const;
+async function listCases() {
+  const casesDirectory = path.join(directory, 'fixtures', 'reto-01', 'casos');
+  const entries = await readdir(casesDirectory, { withFileTypes: true });
+  const cases = await Promise.all(entries.filter((entry) => entry.isDirectory()).map(async (entry) => {
+    const solicitud = JSON.parse(await readFile(path.join(casesDirectory, entry.name, 'solicitud.json'), 'utf8')) as { cliente: string; formato: 'xlsx' | 'pdf' | 'portal' };
+    return { caso: entry.name, cliente: solicitud.cliente, formato: solicitud.formato };
+  }));
+  return cases.sort((left, right) => left.caso.localeCompare(right.caso));
+}
 const definitions: ToolDefinition[] = [
   { name: 'proveedor.leerSolicitud', description: leerSolicitud.description, parameters: { type: 'object', properties: { caso: { type: 'string', description: 'Nombre de la carpeta del caso.' } }, required: ['caso'], additionalProperties: false } },
   { name: 'proveedor.mapearCampos', description: mapearCampos.description, parameters: { type: 'object', properties: { caso: { type: 'string' }, campos: { type: 'array', items: { type: 'string' } } }, required: ['caso'], additionalProperties: false } },
@@ -33,6 +42,9 @@ async function executeTool(name: keyof typeof tools, args: Record<string, unknow
 function toolContext(sessionId: string): ToolContext { return { directory, storageDirectory, sessionId }; }
 async function logChat(sessionId: string, event: Record<string, unknown>) { const target = path.join(storageDirectory, 'out', '_sessions', `${sessionId}.jsonl`); await mkdir(path.dirname(target), { recursive: true }); await appendFile(target, JSON.stringify({ ts: new Date().toISOString(), ...event }) + '\n'); }
 app.get('/api/health', (_request, response) => response.json({ ok: true, provider: adapter.name, model: adapter.model }));
+app.get('/api/cases', async (_request, response) => {
+  try { response.json(await listCases()); } catch (error) { response.status(500).json({ error: error instanceof Error ? error.message : 'No fue posible listar los casos.' }); }
+});
 app.get('/api/sessions/:id', (request, response) => { const session = getSession(request.params.id); response.json({ messages: session.messages.filter((message) => message.role !== 'system'), toolCalls: session.traces, needsConfirmation: session.needsConfirmation }); });
 app.post('/api/chat', async (request, response) => {
   const parsed = sessionSchema.safeParse(request.body); if (!parsed.success) return response.status(400).json({ error: 'sessionId y message son obligatorios.' });
