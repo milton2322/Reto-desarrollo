@@ -1,0 +1,6 @@
+[
+  { "etiqueta": "Nombre legal", "obligatorio": true },
+  { "etiqueta": "Identificacion tributaria", "obligatorio": true },
+  { "etiqueta": "Correo electronico", "obligatorio": true },
+  { "etiqueta": "Codigo proveedor cliente", "obligatorio": false }
+]

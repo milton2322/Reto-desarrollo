@@ -1,0 +1,7 @@
+[
+  { "hoja": "Registro", "celda": "B2", "etiqueta": "Razon social" },
+  { "hoja": "Registro", "celda": "B3", "etiqueta": "NIT" },
+  { "hoja": "Registro", "celda": "B4", "etiqueta": "Direccion fiscal" },
+  { "hoja": "Registro", "celda": "B5", "etiqueta": "Representante legal" },
+  { "hoja": "Registro", "celda": "B6", "etiqueta": "Numero de cuenta" }
+]

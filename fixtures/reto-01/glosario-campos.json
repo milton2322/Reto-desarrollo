@@ -1,0 +1,18 @@
+{
+  "razon social": "razon_social",
+  "nombre legal": "razon_social",
+  "identificacion tributaria": "nit",
+  "nit": "nit",
+  "ruc": "nit",
+  "rtn": "nit",
+  "direccion fiscal": "direccion",
+  "direccion": "direccion",
+  "representante legal": "representante_legal",
+  "contacto": "email_contacto",
+  "correo electronico": "email_contacto",
+  "telefono": "telefono",
+  "banco": "banco",
+  "tipo de cuenta": "tipo_cuenta",
+  "numero de cuenta": "cuenta_bancaria",
+  "ciiu": "ciiu"
+}

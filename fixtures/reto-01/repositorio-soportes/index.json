@@ -1,0 +1,6 @@
+[
+  { "tipo": "rut", "archivo": "RUT.txt", "vigencia_hasta": "2099-12-31", "pais_emisor": "CO" },
+  { "tipo": "camara_de_comercio", "archivo": "Camara-de-Comercio.txt", "vigencia_hasta": "2025-12-31", "pais_emisor": "CO" },
+  { "tipo": "certificacion_bancaria", "archivo": "Certificacion-Bancaria.txt", "vigencia_hasta": "2099-12-31", "pais_emisor": "CO" },
+  { "tipo": "parafiscales", "archivo": "Parafiscales.txt", "vigencia_hasta": "2099-12-31", "pais_emisor": "CO" }
+]

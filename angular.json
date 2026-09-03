@@ -1,0 +1,17 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "newProjectRoot": "projects",
+  "projects": {
+    "registro-proveedor-web": {
+      "projectType": "application",
+      "root": "web",
+      "sourceRoot": "web/src",
+      "prefix": "app",
+      "architect": {
+        "build": { "builder": "@angular/build:application", "options": { "browser": "web/src/main.ts", "tsConfig": "web/tsconfig.app.json", "assets": [], "styles": ["web/src/styles.css"] } },
+        "serve": { "builder": "@angular/build:dev-server", "options": { "buildTarget": "registro-proveedor-web:build" } }
+      }
+    }
+  }
+}

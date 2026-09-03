@@ -1,0 +1,14 @@
+{
+  "razon_social": "Periferia IT Group S.A.S.",
+  "nit": "901234567-8",
+  "direccion": "Carrera 11 # 93-53, Bogota D.C., Colombia",
+  "representante_legal": "Maria Fernanda Lopez",
+  "email_contacto": "proveedores@periferia.example",
+  "telefono": "+57 601 555 0123",
+  "banco": "Banco de Bogota",
+  "tipo_cuenta": "Corriente",
+  "cuenta_bancaria": "1234567890",
+  "ciiu": "6201",
+  "ciudad": "Bogota",
+  "pais": "Colombia"
+}
