@@ -8,7 +8,7 @@ import type { ChatMessage, LlmAdapter, ToolDefinition } from './llm/adapter.js';
 import { OpenAiAdapter } from './llm/openai.js';
 import { LocalAdapter } from './llm/local.js';
 
-export async function createApp(directory = process.cwd()) {
+export async function createApp(directory = process.cwd(), storageDirectory = directory) {
 const prompt = await readFile(path.join(directory, 'agent', 'prompt.md'), 'utf8');
 const app = express(); app.use(express.json({ limit: '1mb' }));
 const maxIterations = Number(process.env.MAX_AGENT_ITERATIONS ?? 25);
@@ -30,7 +30,8 @@ const definitions: ToolDefinition[] = [
 function getSession(sessionId: string) { if (!sessions.has(sessionId)) sessions.set(sessionId, { messages: [{ role: 'system', content: prompt }], traces: [], needsConfirmation: false }); return sessions.get(sessionId)!; }
 function isConfirmation(message: string) { return /^(si|sí|confirmo|confirmar|envia|enviar|proceder|adelante)\b/i.test(message.trim()); }
 async function executeTool(name: keyof typeof tools, args: Record<string, unknown>, ctx: ToolContext) { return tools[name].execute(args, ctx); }
-async function logChat(sessionId: string, event: Record<string, unknown>) { const runtimeRoot = process.env.NETLIFY ? path.join('/tmp', 'registro-proveedor') : directory; const target = path.join(runtimeRoot, 'out', '_sessions', `${sessionId}.jsonl`); await mkdir(path.dirname(target), { recursive: true }); await appendFile(target, JSON.stringify({ ts: new Date().toISOString(), ...event }) + '\n'); }
+function toolContext(sessionId: string): ToolContext { return { directory, storageDirectory, sessionId }; }
+async function logChat(sessionId: string, event: Record<string, unknown>) { const target = path.join(storageDirectory, 'out', '_sessions', `${sessionId}.jsonl`); await mkdir(path.dirname(target), { recursive: true }); await appendFile(target, JSON.stringify({ ts: new Date().toISOString(), ...event }) + '\n'); }
 app.get('/api/health', (_request, response) => response.json({ ok: true, provider: adapter.name, model: adapter.model }));
 app.get('/api/sessions/:id', (request, response) => { const session = getSession(request.params.id); response.json({ messages: session.messages.filter((message) => message.role !== 'system'), toolCalls: session.traces, needsConfirmation: session.needsConfirmation }); });
 app.post('/api/chat', async (request, response) => {
@@ -38,14 +39,14 @@ app.post('/api/chat', async (request, response) => {
   const { sessionId, message } = parsed.data; const session = getSession(sessionId); session.messages.push({ role: 'user', content: message }); await logChat(sessionId, { role: 'user', message });
   try {
     if (session.needsConfirmation && isConfirmation(message) && session.caso) {
-      const output = await simularEnvio.execute({ caso: session.caso, confirmado: true }, { directory, sessionId }); session.traces.push({ nombre: 'proveedor.simularEnvio', argumentos: { caso: session.caso, confirmado: true }, resultado: output }); session.messages.push({ role: 'tool', name: 'proveedor.simularEnvio', content: output }); session.needsConfirmation = false; const reply = 'Envio simulado creado. No se realizo ningun envio externo.'; session.messages.push({ role: 'assistant', content: reply }); return response.json({ reply, toolCalls: session.traces, needsConfirmation: false });
+      const output = await simularEnvio.execute({ caso: session.caso, confirmado: true }, toolContext(sessionId)); session.traces.push({ nombre: 'proveedor.simularEnvio', argumentos: { caso: session.caso, confirmado: true }, resultado: output }); session.messages.push({ role: 'tool', name: 'proveedor.simularEnvio', content: output }); session.needsConfirmation = false; const reply = 'Envio simulado creado. No se realizo ningun envio externo.'; session.messages.push({ role: 'assistant', content: reply }); return response.json({ reply, toolCalls: session.traces, needsConfirmation: false });
     }
     session.traces = []; let reply = ''; let iterations = 0;
     while (iterations++ < maxIterations) {
       const modelReply = await adapter.respond(session.messages, definitions, session.responseId); session.responseId = modelReply.responseId;
       if (!modelReply.toolCalls.length) { reply = modelReply.text || 'No pude completar la solicitud.'; break; }
       for (const call of modelReply.toolCalls) {
-        if (!(call.name in tools)) continue; const output = await executeTool(call.name as keyof typeof tools, call.arguments, { directory, sessionId }); const args = call.arguments as { caso?: string }; if (args.caso) session.caso = args.caso;
+        if (!(call.name in tools)) continue; const output = await executeTool(call.name as keyof typeof tools, call.arguments, toolContext(sessionId)); const args = call.arguments as { caso?: string }; if (args.caso) session.caso = args.caso;
         session.traces.push({ nombre: call.name, argumentos: call.arguments, resultado: output }); session.messages.push({ role: 'tool', name: call.name, toolCallId: call.id, content: output }); await logChat(sessionId, { role: 'tool', name: call.name, arguments: call.arguments, result: output });
       }
     }

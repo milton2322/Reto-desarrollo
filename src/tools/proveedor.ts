@@ -14,7 +14,7 @@ const sendSchema = z.object({ caso: z.string().min(1).describe('Nombre de la car
 
 const root = (ctx: ToolContext) => path.join(ctx.directory, 'fixtures', 'reto-01');
 const caseDir = (ctx: ToolContext, caso: string) => path.join(root(ctx), 'casos', caso);
-const storageRoot = (ctx: ToolContext) => process.env.NETLIFY ? path.join('/tmp', 'registro-proveedor') : ctx.directory;
+const storageRoot = (ctx: ToolContext) => ctx.storageDirectory ?? ctx.directory;
 const outDir = (ctx: ToolContext, caso: string) => path.join(storageRoot(ctx), 'out', caso);
 const artifactPath = (ctx: ToolContext, relative: string) => path.join(storageRoot(ctx), relative);
 const json = async <T>(file: string): Promise<T> => JSON.parse(await readFile(file, 'utf8')) as T;
