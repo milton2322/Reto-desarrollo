@@ -56,12 +56,3 @@ app.post('/api/chat', async (request, response) => {
 
 return app;
 }
-
-if (!process.env.NETLIFY && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
-  void createApp().then((app) => {
-    app.listen(Number(process.env.PORT ?? 3000), () => console.log(`API disponible en http://localhost:${process.env.PORT ?? 3000}`));
-  }).catch((error: unknown) => {
-    console.error('No fue posible iniciar la API.', error);
-    process.exitCode = 1;
-  });
-}

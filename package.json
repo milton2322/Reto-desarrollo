@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "node ./node_modules/concurrently/dist/bin/concurrently.js -k \"npm:dev:api\" \"npm:dev:web\"",
-    "dev:api": "node ./node_modules/tsx/dist/cli.mjs watch src/server.ts",
+    "dev:api": "node ./node_modules/tsx/dist/cli.mjs watch src/local-server.ts",
     "dev:web": "node ./node_modules/@angular/cli/bin/ng.js serve --proxy-config proxy.conf.json",
     "build": "node ./node_modules/@angular/cli/bin/ng.js build",
     "demo": "node ./node_modules/tsx/dist/cli.mjs demo.ts",
