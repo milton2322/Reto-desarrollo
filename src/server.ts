@@ -1,7 +1,6 @@
 import express from 'express';
 import path from 'node:path';
 import { appendFile, mkdir, readFile } from 'node:fs/promises';
-import { fileURLToPath } from 'node:url';
 import { z } from 'zod';
 import { leerSolicitud, mapearCampos, generarFormulario, armarPaquete, simularEnvio } from './tools/proveedor.js';
 import type { ToolContext, ToolTrace } from './types.js';
@@ -58,7 +57,11 @@ app.post('/api/chat', async (request, response) => {
 return app;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
-  const app = await createApp();
-  app.listen(Number(process.env.PORT ?? 3000), () => console.log(`API disponible en http://localhost:${process.env.PORT ?? 3000}`));
+if (!process.env.NETLIFY && !process.env.AWS_LAMBDA_FUNCTION_NAME) {
+  void createApp().then((app) => {
+    app.listen(Number(process.env.PORT ?? 3000), () => console.log(`API disponible en http://localhost:${process.env.PORT ?? 3000}`));
+  }).catch((error: unknown) => {
+    console.error('No fue posible iniciar la API.', error);
+    process.exitCode = 1;
+  });
 }
